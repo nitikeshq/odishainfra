@@ -1,0 +1,614 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  CUSTOMER
+  DEVELOPER
+  ADMIN
+}
+
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  PLOT
+  DUPLEX
+  ROW_HOUSE
+  PENTHOUSE
+  STUDIO
+  FARMHOUSE
+  COMMERCIAL
+  OFFICE_SPACE
+  SHOP
+  WAREHOUSE
+  HOSPITALITY
+  MIXED_USE
+  INDUSTRIAL
+  TOWNSHIP
+}
+
+enum PropertyStatus {
+  NEW_LAUNCH
+  PRE_LAUNCH
+  UNDER_CONSTRUCTION
+  READY_TO_MOVE
+  SOLD_OUT
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  INACTIVE
+  ARCHIVED
+}
+
+enum LeadStatus {
+  PENDING
+  IN_REVIEW
+  VALIDATED
+  CONNECTED
+  REJECTED
+  CLOSED
+}
+
+enum NotificationType {
+  CALLBACK_VALIDATED
+  CALLBACK_CONNECTED
+  NEW_PROJECT
+  PRICE_DROP
+  PLATFORM_UPDATE
+  LEAD_RECEIVED
+  KYC_UPDATE
+  SUBSCRIPTION_ALERT
+  COMMISSION_UPDATE
+  AMENITY_APPROVED
+  AMENITY_REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum OtpChannel {
+  SMS
+  EMAIL
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─── USER ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  phone         String?   @unique
+  email         String?   @unique
+  name          String?
+  avatarUrl     String?
+  role          UserRole  @default(CUSTOMER)
+  isBlocked     Boolean   @default(false)
+  isVerified    Boolean   @default(false)
+  fcmToken      String?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  developerProfile  DeveloperProfile?
+  wishlists         Wishlist[]
+  callbackRequests  CallbackRequest[]
+  notifications     Notification[]
+  propertyViews     PropertyView[]
+  shorts            Short[]
+
+  @@map("users")
+}
+
+// ─── OTP ──────────────────────────────────────────────────────────────────────
+
+model Otp {
+  id        String     @id @default(uuid())
+  phone     String?
+  email     String?
+  channel   OtpChannel @default(SMS)
+  code      String
+  expiresAt DateTime
+  verified  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  @@index([phone, code])
+  @@index([email, code])
+  @@map("otps")
+}
+
+// ─── DEVELOPER PROFILE ────────────────────────────────────────────────────────
+
+model DeveloperProfile {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  companyName     String
+  companyLogo     String?
+  description     String?
+  website         String?
+  reraNumber      String?
+  gstNumber       String?
+  panNumber       String?
+  address         String?
+  city            String?
+  state           String?
+  establishedYear Int?
+  totalProjects   Int       @default(0)
+  rating          Float     @default(0)
+  kycStatus       KycStatus @default(NOT_SUBMITTED)
+  kycDocuments    Json?
+  kycReviewedAt   DateTime?
+  kycReviewNotes  String?
+
+  // Commission
+  commissionPercent  Float  @default(2.0)  // default 2% of sale amount — admin can override per developer
+  commissionNotes    String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties    Property[]
+  subscription  DeveloperSubscription?
+  sales         Sale[]
+
+  @@map("developer_profiles")
+}
+
+// ─── PROPERTY ─────────────────────────────────────────────────────────────────
+
+model Property {
+  id                String         @id @default(uuid())
+  developerId       String
+  name              String
+  slug              String         @unique
+  description       String?
+  highlights        String?        // key selling points, comma-separated
+  propertyType      PropertyType
+  status            PropertyStatus
+  listingStatus     ListingStatus  @default(PENDING_REVIEW)
+  isFeatured        Boolean        @default(false)
+
+  // Pricing
+  priceMin          Float?
+  priceMax          Float?
+  pricePerSqft      Float?
+  emiStarting       Float?
+
+  // Configuration
+  bhkConfig         String?        // e.g., "1/2/3/3.5/4/5/6 BHK"
+  areaMin           Float?         // sq ft
+  areaMax           Float?
+  plotAreaMin       Float?         // for plots: sq yards / acres
+  plotAreaMax       Float?
+  plotAreaUnit      String?        // "SQ_YARDS", "ACRES", "SQ_FT"
+  totalFloors       Int?
+  totalUnits        Int?
+  availableUnits    Int?
+  totalTowers       Int?
+  parkingSlots      Int?
+
+  // Location
+  address           String?
+  locality          String?
+  city              String
+  state             String         @default("Odisha")
+  pincode           String?
+  latitude          Float?
+  longitude         Float?
+
+  // Compliance & Approvals
+  reraNumber        String?
+  reraApproved      Boolean        @default(false)
+  reraCertUrl       String?        // uploaded RERA certificate
+  govtApproved      Boolean        @default(false)
+  govtApprovalNo    String?
+  environmentClearance Boolean     @default(false)
+  buildingPermit    Boolean        @default(false)
+  occupancyCert     Boolean        @default(false)
+  fireSafetyCert    Boolean        @default(false)
+  commencement      Boolean        @default(false) // commencement certificate
+  completionCert    Boolean        @default(false)
+  approvalNotes     String?        // any extra approval info
+
+  // Brochure
+  brochureUrl       String?
+  brochureS3Key     String?
+
+  // Dates
+  possessionDate    DateTime?
+  launchDate        DateTime?
+
+  // Counts (denormalized for performance)
+  viewCount         Int            @default(0)
+  wishlistCount     Int            @default(0)
+  callbackCount     Int            @default(0)
+  shortCount        Int            @default(0)
+
+  // Admin
+  reviewNotes       String?
+  reviewedAt        DateTime?
+  rejectionReason   String?
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  developer         DeveloperProfile @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  media             PropertyMedia[]
+  amenities         PropertyAmenity[]
+  unitConfigs       PropertyUnit[]
+  nearbyPlaces      NearbyPlace[]
+  wishlists         Wishlist[]
+  callbackRequests  CallbackRequest[]
+  shorts            Short[]
+  views             PropertyView[]
+  floorPlans        FloorPlan[]
+  sales             Sale[]
+
+  @@index([city, propertyType, status])
+  @@index([listingStatus])
+  @@index([isFeatured])
+  @@index([locality, city])
+  @@map("properties")
+}
+
+// ─── PROPERTY MEDIA ───────────────────────────────────────────────────────────
+
+model PropertyMedia {
+  id         String   @id @default(uuid())
+  propertyId String
+  url        String
+  s3Key      String?  // S3 object key for deletion
+  mediaType  String   @default("IMAGE") // IMAGE, VIDEO, FLOOR_PLAN, BROCHURE
+  type       String   @default("image") // legacy compat
+  caption    String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_media")
+}
+
+// ─── FLOOR PLAN ───────────────────────────────────────────────────────────────
+
+model FloorPlan {
+  id         String   @id @default(uuid())
+  propertyId String
+  title      String   // e.g., "2 BHK - Type A"
+  imageUrl   String
+  area       Float?
+  price      Float?
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("floor_plans")
+}
+
+// ─── PROPERTY UNIT CONFIGURATION (BHK types with area & price) ──────────────
+
+model PropertyUnit {
+  id            String   @id @default(uuid())
+  propertyId    String
+  unitType      String   // "1 BHK", "2 BHK", "3 BHK", "3.5 BHK", "4 BHK", "5 BHK", "6 BHK", "Plot A", "Shop 1", "Suite", etc.
+  carpetArea    Float?   // sq ft
+  builtUpArea   Float?   // sq ft
+  superArea     Float?   // sq ft
+  plotArea      Float?   // for plots: sq yards / acres
+  plotAreaUnit  String?  // "SQ_YARDS", "ACRES", "SQ_FT"
+  price         Float?
+  pricePerSqft  Float?
+  bedrooms      Float?   // 3.5 for 3.5 BHK
+  bathrooms     Int?
+  balconies     Int?
+  floorPlanUrl  String?
+  isAvailable   Boolean  @default(true)
+  totalUnits    Int?     // how many of this type exist
+  availableUnits Int?
+  createdAt     DateTime @default(now())
+
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_units")
+}
+
+// ─── NEARBY PLACES ──────────────────────────────────────────────────────────
+
+model NearbyPlace {
+  id            String   @id @default(uuid())
+  propertyId    String
+  name          String   // "KIIT University", "Apollo Hospital", "Utkal Mall"
+  category      String   // "Education", "Healthcare", "Shopping", "Transport", "Restaurant", "Park", "Bank", "Temple"
+  distance      Float?   // in km
+  distanceText  String?  // "2.5 km", "10 min drive"
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime @default(now())
+
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("nearby_places")
+}
+
+// ─── AMENITY MASTER (system defaults + developer custom with approval) ──────
+
+model AmenityMaster {
+  id             String         @id @default(uuid())
+  name           String         @unique
+  icon           String?
+  category       String         // "Recreation", "Safety", "Convenience", "Lifestyle", "Sports", "Infrastructure"
+  isDefault      Boolean        @default(false)  // true = system default, always available
+  createdById    String?        // developer who requested this (null for system defaults)
+  approvalStatus ApprovalStatus @default(APPROVED) // defaults are auto-approved
+  approvedAt     DateTime?
+  rejectedReason String?
+  createdAt      DateTime       @default(now())
+
+  properties     PropertyAmenity[]
+
+  @@index([category])
+  @@index([approvalStatus])
+  @@map("amenity_master")
+}
+
+// ─── PROPERTY AMENITY (join table → links property to amenity master) ───────
+
+model PropertyAmenity {
+  id         String   @id @default(uuid())
+  propertyId String
+  amenityId  String
+  name       String   // denormalized for convenience
+  icon       String?
+  category   String?
+
+  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity    AmenityMaster @relation(fields: [amenityId], references: [id])
+
+  @@unique([propertyId, amenityId])
+  @@map("property_amenities")
+}
+
+// ─── SHORTS / REELS ──────────────────────────────────────────────────────────
+
+model Short {
+  id             String   @id @default(uuid())
+  propertyId     String
+  uploaderId     String
+  videoUrl       String
+  videoS3Key     String?  // S3 object key
+  thumbnailUrl   String?
+  thumbnailS3Key String?  // S3 object key for thumbnail
+  caption        String?
+  duration       Float?   // seconds
+  viewCount      Int      @default(0)
+  likeCount      Int      @default(0)
+  shareCount     Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  uploader       User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("shorts")
+}
+
+// ─── WISHLIST ─────────────────────────────────────────────────────────────────
+
+model Wishlist {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@map("wishlists")
+}
+
+// ─── CALLBACK REQUEST / LEAD ─────────────────────────────────────────────────
+
+model CallbackRequest {
+  id              String     @id @default(uuid())
+  leadNumber      String     @unique // e.g., "LEAD-2026-0042"
+  userId          String
+  propertyId      String
+  phone           String
+  bestTimeToCall  String?
+  status          LeadStatus @default(PENDING)
+  adminNotes      String?
+  validatedAt     DateTime?
+  connectedAt     DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property        Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([propertyId])
+  @@map("callback_requests")
+}
+
+// ─── PROPERTY VIEW ────────────────────────────────────────────────────────────
+
+model PropertyView {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  viewedAt   DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([propertyId])
+  @@map("property_views")
+}
+
+// ─── NOTIFICATION ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?            // extra payload (propertyId, leadId, etc.)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ─── PUSH NOTIFICATION CAMPAIGN ──────────────────────────────────────────────
+
+model PushCampaign {
+  id             String   @id @default(uuid())
+  title          String
+  body           String
+  targetAudience String   @default("ALL") // ALL, BBSR, CUTTACK, PURI, etc.
+  targetRole     UserRole @default(CUSTOMER)
+  sentCount      Int      @default(0)
+  openRate       Float?
+  sentAt         DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@map("push_campaigns")
+}
+
+// ─── SUBSCRIPTION PLAN ───────────────────────────────────────────────────────
+
+model SubscriptionPlan {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "Basic", "Premium"
+  description String?
+  priceMonthly Float
+  maxProjects  Int     @default(5)
+  maxShorts    Int     @default(10)
+  features    Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions DeveloperSubscription[]
+
+  @@map("subscription_plans")
+}
+
+// ─── DEVELOPER SUBSCRIPTION ──────────────────────────────────────────────────
+
+model DeveloperSubscription {
+  id            String             @id @default(uuid())
+  developerId   String             @unique
+  planId        String
+  status        SubscriptionStatus @default(PENDING)
+  startDate     DateTime?
+  endDate       DateTime?
+  paymentRef    String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  developer     DeveloperProfile   @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  plan          SubscriptionPlan   @relation(fields: [planId], references: [id])
+
+  @@map("developer_subscriptions")
+}
+
+// ─── PLATFORM SETTINGS ───────────────────────────────────────────────────────
+
+model PlatformSettings {
+  id                    String  @id @default("default")
+  subscriptionEnabled   Boolean @default(false)
+  maintenanceMode       Boolean @default(false)
+  freeListingEnabled    Boolean @default(true)
+  maxFreeProjects       Int     @default(100)
+  callbackSlaHours      Int     @default(48)
+  kycSlaHours           Int     @default(72)
+  featuredMaxCount      Int     @default(5)
+  defaultCommissionPct  Float   @default(2.0)  // default commission % for new developers
+  appVersion            String  @default("1.0.0")
+  updatedAt             DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
+// ─── SALE (tracks property sales for commission calculation) ─────────────────
+
+model Sale {
+  id                String   @id @default(uuid())
+  propertyId        String
+  developerId       String
+  unitType          String?  // "2 BHK", "Plot A", etc.
+  buyerName         String?  // optional — admin enters
+  saleAmount        Float
+  commissionPercent Float    @default(2.0)
+  commissionAmount  Float    // pre-calculated: saleAmount * commissionPercent / 100
+  commissionPaid    Boolean  @default(false)
+  paidAt            DateTime?
+  adminNotes        String?
+  saleDate          DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  property          Property         @relation(fields: [propertyId], references: [id])
+  developer         DeveloperProfile @relation(fields: [developerId], references: [id])
+
+  @@index([developerId])
+  @@index([propertyId])
+  @@map("sales")
+}
+
+// ─── WEBSITE LEAD (contact form from landing page) ──────────────────────────
+
+model WebsiteLead {
+  id         String   @id @default(uuid())
+  name       String
+  email      String?
+  phone      String?
+  message    String?
+  source     String   @default("landing_page") // "landing_page", "contact_form", "property_inquiry"
+  propertyId String?  // optional — if lead came from a specific property page
+  isRead     Boolean  @default(false)
+  adminNotes String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isRead])
+  @@map("website_leads")
+}

@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OdishaInfra — Complete Prototype v2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#FF8240;
+  --yellow:#FDD171;
+  --black:#010409;
+  --dark:#0d0d0d;
+  --card:#141414;
+  --card2:#1e1e1e;
+  --text:#e8e8e8;
+  --muted:#888888;
+  --white:#FFFFFF;
+  --green:#27AE60;
+  --border:#2a2a2a;
+  --blue:#2980B9;
+  --red:#e74c3c;
+  --purple:#9b59b6;
+}
+html,body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;min-height:100vh;overflow-x:hidden}
+.outer{display:flex;flex-direction:column;align-items:center;padding:24px 16px 80px}
+.page-title{color:var(--text);font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;text-align:center;opacity:0.5}
+.brand-header{text-align:center;margin-bottom:32px;padding-top:8px}
+.brand-header h1{font-size:28px;font-weight:800;color:var(--white);letter-spacing:-1px}
+.brand-header h1 span{color:var(--orange)}
+.brand-header p{font-size:12px;color:var(--muted);margin-top:4px;font-weight:500}
+.screen-grid{display:grid;grid-template-columns:repeat(auto-fill,375px);gap:32px;justify-content:center;width:100%;max-width:1800px}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.screen-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.screen-label .sid{background:rgba(255,130,64,0.15);color:var(--orange);padding:2px 8px;border-radius:6px;font-size:10px}
+.screen-label .sid.admin{background:rgba(155,89,182,0.15);color:var(--purple)}
+.phone{width:375px;flex-shrink:0;background:var(--black);border-radius:44px;border:2px solid #2a2a2a;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.9),0 0 0 1px rgba(255,255,255,0.04);position:relative;height:780px}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:var(--black);border-radius:0 0 20px 20px;z-index:200}
+/* STATUS BAR */
+.sb{height:44px;background:var(--black);display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:11px;font-weight:600;color:var(--white);position:relative;z-index:100}
+.sb.admin-sb{background:#0d0a14}
+.sb-left{display:flex;align-items:center;gap:4px}
+.sb-right{display:flex;align-items:center;gap:4px}
+.sb-right svg{width:14px;height:14px;stroke:var(--white);fill:none;stroke-width:2}
+.battery{width:22px;height:11px;border:1.5px solid var(--white);border-radius:3px;position:relative;display:inline-flex;align-items:center;padding:1.5px}
+.battery::after{content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:2.5px;height:5px;background:var(--white);border-radius:0 1px 1px 0}
+.battery-fill{height:100%;width:75%;background:var(--white);border-radius:1px}
+/* SCREEN BODY */
+.sb-content{position:absolute;top:44px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--black);scrollbar-width:none;display:flex;flex-direction:column}
+.sb-content::-webkit-scrollbar{display:none}
+.sb-content.admin-bg{background:#08060f}
+/* BOTTOM NAV */
+.bnav{position:sticky;bottom:0;left:0;right:0;height:72px;background:rgba(10,10,10,0.97);border-top:1px solid #1a1a1a;display:flex;align-items:center;justify-content:space-around;backdrop-filter:blur(20px);padding-bottom:6px;margin-top:auto;flex-shrink:0;z-index:50}
+.admin-bnav{background:rgba(8,6,15,0.97);border-top:1px solid #1e1e2e}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 14px;border-radius:12px;font-size:10px;font-weight:600;color:var(--muted);transition:color 0.2s}
+.ni svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.ni.active{color:var(--orange)}
+.ni.active-admin{color:var(--purple)}
+.ni.shorts-btn .ni-icon-wrap{width:44px;height:44px;background:var(--orange);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:-8px;box-shadow:0 4px 16px rgba(255,130,64,0.4)}
+.ni.shorts-btn svg{stroke:var(--black);width:20px;height:20px}
+/* UTILITIES */
+.scrollable{flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:80px}
+.scrollable::-webkit-scrollbar{display:none}
+/* COMMON COMPONENTS */
+.btn-primary{background:var(--orange);color:var(--black);border:none;border-radius:16px;height:54px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;width:100%;letter-spacing:0.2px;transition:opacity 0.15s}
+.btn-ghost{background:transparent;color:var(--text);border:1.5px solid #2a2a2a;border-radius:16px;height:54px;font-size:15px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;width:100%}
+.btn-sm{background:var(--orange);color:var(--black);border:none;border-radius:12px;padding:8px 16px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.btn-purple{background:var(--purple);color:var(--white);border:none;border-radius:12px;padding:8px 16px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:0.3px}
+.badge-orange{background:rgba(255,130,64,0.15);color:var(--orange)}
+.badge-green{background:rgba(39,174,96,0.15);color:var(--green)}
+.badge-blue{background:rgba(41,128,185,0.15);color:var(--blue)}
+.badge-red{background:rgba(231,76,60,0.15);color:var(--red)}
+.badge-purple{background:rgba(155,89,182,0.15);color:var(--purple)}
+.badge-yellow{background:rgba(253,209,113,0.15);color:var(--yellow)}
+.badge-filled{background:var(--orange);color:var(--black)}
+.sec-hd{padding:18px 20px 10px;display:flex;align-items:center;justify-content:space-between}
+.sec-hd h2{font-size:16px;font-weight:700;color:var(--white)}
+.see-all{font-size:13px;color:var(--orange);font-weight:600;cursor:pointer}
+.divider{height:1px;background:#1a1a1a;margin:0 20px}
+/* PROPERTY CARDS */
+.hscroll{display:flex;gap:14px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.prop-card{flex-shrink:0;width:220px;background:var(--card);border-radius:20px;overflow:hidden;cursor:pointer;border:1px solid #1e1e1e}
+.prop-card-img{height:130px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.prop-card-img svg{width:48px;height:48px;opacity:0.15;stroke:var(--orange);fill:none;stroke-width:1}
+.prop-card-img-bg{position:absolute;inset:0}
+.pc-badge{position:absolute;top:10px;left:10px}
+.pc-heart{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px)}
+.pc-heart svg{width:15px;height:15px;stroke:var(--white);fill:none;stroke-width:2}
+.prop-card-body{padding:12px}
+.prop-card-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop-card-loc{font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.prop-card-loc svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.prop-card-price{font-size:16px;font-weight:800;color:var(--orange)}
+.prop-card-config{font-size:10px;color:var(--muted);margin-top:2px}
+/* LIST CARD */
+.list-card{background:var(--card);border-radius:16px;overflow:hidden;display:flex;border:1px solid #1e1e1e;cursor:pointer;margin:0 20px 12px}
+.lc-img{width:100px;flex-shrink:0;background:var(--card2);display:flex;align-items:center;justify-content:center;position:relative}
+.lc-img svg{width:36px;height:36px;opacity:0.15;stroke:var(--orange);fill:none;stroke-width:1}
+.lc-body{padding:12px;flex:1;min-width:0}
+.lc-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-loc{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:3px}
+.lc-loc svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.lc-price{font-size:14px;font-weight:800;color:var(--orange);margin-bottom:4px}
+.lc-tags{display:flex;gap:5px;flex-wrap:wrap}
+/* CHIP */
+.chip-row{display:flex;gap:8px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;white-space:nowrap}
+.chip.on{background:var(--orange);color:var(--black);border-color:var(--orange)}
+.chip.on-purple{background:var(--purple);color:var(--white);border-color:var(--purple)}
+/* SEARCH BAR */
+.search-bar{margin:12px 20px 0;background:var(--card);border-radius:14px;padding:0 16px;height:48px;display:flex;align-items:center;gap:10px;border:1px solid #222;cursor:pointer}
+.search-bar svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.search-bar span{color:var(--muted);font-size:14px;flex:1;font-weight:400}
+.ai-badge{background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--black);font-size:9px;font-weight:800;padding:3px 8px;border-radius:7px;letter-spacing:0.3px}
+/* S01 SPLASH */
+.splash-inner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+.logo-mark{width:76px;height:76px;background:var(--orange);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(255,130,64,0.3)}
+.logo-mark::after{content:'';position:absolute;top:-10px;right:-10px;width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:50%}
+.logo-mark svg{width:40px;height:40px;stroke:var(--black);fill:none;stroke-width:2.5;position:relative;z-index:1}
+.logo-name{font-size:30px;font-weight:800;color:var(--white);letter-spacing:-1px;text-align:center}
+.logo-sub{font-size:13px;color:var(--muted);margin-top:4px;text-align:center;font-weight:400}
+.splash-divider{width:40px;height:3px;background:var(--orange);border-radius:2px;margin:28px auto}
+.splash-tagline{font-size:26px;font-weight:700;color:var(--white);text-align:center;line-height:1.3;letter-spacing:-0.5px}
+.splash-tagline em{color:var(--orange);font-style:normal}
+.splash-btns{padding:32px 24px 20px;display:flex;flex-direction:column;gap:12px;width:100%}
+.splash-note{text-align:center;font-size:11px;color:var(--muted);padding:0 24px 24px;line-height:1.6}
+/* S02 HOME */
+.home-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.greeting{font-size:20px;font-weight:700;color:var(--white);letter-spacing:-0.5px}
+.greeting span{color:var(--orange)}
+.ha-right{display:flex;align-items:center;gap:10px}
+.notif-bell{width:38px;height:38px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid #1e1e1e;position:relative}
+.notif-bell svg{width:18px;height:18px;stroke:var(--text);fill:none;stroke-width:1.8}
+.notif-dot{position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--black)}
+.avatar{width:38px;height:38px;background:var(--orange);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--black);cursor:pointer}
+.avatar.admin-avatar{background:var(--purple)}
+.featured-banner{margin:16px 20px 0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);border-radius:20px;padding:20px;border:1px solid #222;position:relative;overflow:hidden;cursor:pointer}
+.featured-banner::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,130,64,0.2) 0%,transparent 70%);border-radius:50%}
+.fb-tag{font-size:10px;font-weight:700;color:var(--orange);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px}
+.fb-name{font-size:18px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px}
+.fb-loc{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.fb-loc svg{width:11px;height:11px;stroke:rgba(255,255,255,0.5);fill:none;stroke-width:2}
+.fb-bottom{display:flex;align-items:center;justify-content:space-between}
+.fb-price{font-size:20px;font-weight:800;color:var(--orange)}
+.fb-price-sub{font-size:10px;color:var(--muted)}
+.fb-cta{background:var(--orange);color:var(--black);border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+/* S03 SEARCH */
+.search-scr-header{padding:16px 20px 0}
+.search-scr-title{font-size:22px;font-weight:800;color:var(--white);margin-bottom:14px;letter-spacing:-0.5px}
+.big-search{background:var(--card);border-radius:16px;padding:0 16px;height:52px;display:flex;align-items:center;gap:12px;border:1px solid #2a2a2a;margin-bottom:14px}
+.big-search svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.big-search input{flex:1;background:transparent;border:none;outline:none;font-size:15px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif}
+.big-search input::placeholder{color:var(--muted)}
+.ai-search-card{background:linear-gradient(135deg,rgba(255,130,64,0.12),rgba(253,209,113,0.08));border:1px solid rgba(255,130,64,0.25);border-radius:16px;padding:14px;margin:0 20px 14px;cursor:pointer}
+.asc-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.asc-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--orange),var(--yellow));border-radius:8px;display:flex;align-items:center;justify-content:center}
+.asc-icon svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2.5}
+.asc-title{font-size:14px;font-weight:700;color:var(--orange)}
+.asc-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.ai-chat-box{margin:0 20px 14px;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid #222}
+.ai-msg-wrap{padding:12px;max-height:140px;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:8px}
+.ai-msg-wrap::-webkit-scrollbar{display:none}
+.ai-msg{padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5}
+.ai-msg.bot{background:rgba(255,130,64,0.08);color:var(--text);border:1px solid rgba(255,130,64,0.1)}
+.ai-msg.user{background:var(--card2);color:var(--text);align-self:flex-end}
+.ai-input-wrap{padding:8px;border-top:1px solid #222;display:flex;gap:8px}
+.ai-input{flex:1;background:var(--card2);border:none;outline:none;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif}
+.ai-send-btn{width:36px;height:36px;background:var(--orange);border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-send-btn svg{width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2.5}
+/* S04 PROPERTY DETAIL */
+.detail-hero{height:240px;position:relative;overflow:hidden;background:var(--card)}
+.detail-hero-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.detail-hero-img svg{width:80px;height:80px;opacity:0.1;stroke:var(--orange);fill:none;stroke-width:1}
+.detail-back{position:absolute;top:60px;left:16px;width:36px;height:36px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);cursor:pointer}
+.detail-back svg{width:16px;height:16px;stroke:var(--white);fill:none;stroke-width:2.5}
+.detail-heart{position:absolute;top:60px;right:16px;width:36px;height:36px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);cursor:pointer}
+.detail-heart svg{width:16px;height:16px;stroke:var(--white);fill:none;stroke-width:2}
+.detail-body{padding:16px 20px;flex:1}
+.detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.detail-name{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px;line-height:1.2;margin-bottom:6px}
+.detail-loc{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-bottom:16px}
+.detail-loc svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2}
+.detail-price{font-size:28px;font-weight:800;color:var(--orange);letter-spacing:-1px;margin-bottom:4px}
+.detail-price-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.spec-item{background:var(--card);border-radius:12px;padding:12px;border:1px solid #1e1e1e}
+.spec-label{font-size:10px;color:var(--muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.3px}
+.spec-value{font-size:13px;font-weight:700;color:var(--white)}
+.map-box{height:120px;background:var(--card);border-radius:16px;border:1px solid #1e1e1e;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;cursor:pointer}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(#1e1e1e 1px,transparent 1px),linear-gradient(90deg,#1e1e1e 1px,transparent 1px);background-size:20px 20px}
+.map-pin{width:36px;height:36px;background:var(--orange);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(255,130,64,0.5);z-index:1;position:relative}
+.map-pin svg{transform:rotate(45deg);width:16px;height:16px;stroke:var(--black);fill:none;stroke-width:2.5}
+.dev-card{background:var(--card);border-radius:16px;padding:14px;border:1px solid #1e1e1e;display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer}
+.dev-avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--orange),var(--yellow));border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--black);flex-shrink:0}
+.dev-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px}
+.dev-sub{font-size:12px;color:var(--muted)}
+.cta-area{padding:0 0 16px}
+.cta-disclaimer{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5;padding:0 16px}
+/* S05 SHORTS */
+.shorts-full{position:relative;height:100%;min-height:640px;flex-shrink:0;display:flex;flex-direction:column;justify-content:flex-end}
+.shorts-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.shorts-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.4) 60%,transparent 100%);padding:20px 16px 0}
+.shorts-dev{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.shorts-dev-av{width:36px;height:36px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--black)}
+.shorts-dev-name{font-size:14px;font-weight:700;color:var(--white);flex:1}
+.follow-btn{background:transparent;border:1.5px solid var(--white);color:var(--white);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.shorts-prop-name{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px;line-height:1.2}
+.shorts-prop-loc{font-size:12px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:4px;margin-bottom:12px}
+.shorts-prop-loc svg{width:11px;height:11px;stroke:rgba(255,255,255,0.7);fill:none;stroke-width:2}
+.shorts-actions{position:absolute;right:12px;bottom:80px;display:flex;flex-direction:column;gap:16px;align-items:center}
+.shorts-act-btn{display:flex;flex-direction:column;align-items:center;gap:4px}
+.shorts-act-btn svg{width:24px;height:24px;stroke:var(--white);fill:none;stroke-width:2}
+.shorts-act-btn span{font-size:11px;color:var(--white);font-weight:600}
+.shorts-cb-btn{width:100%;background:var(--orange);color:var(--black);border:none;border-radius:16px;height:50px;font-size:14px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;margin-bottom:16px}
+.shorts-tabs{position:absolute;top:0;left:0;right:0;display:flex;gap:0;padding:0 20px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.shorts-tab{flex:1;text-align:center;padding:12px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);cursor:pointer}
+.shorts-tab.on{color:var(--white);border-bottom:2px solid var(--orange)}
+/* S06 WISHLIST */
+.wishlist-header{padding:16px 20px 0}
+.wishlist-title{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px}
+.wishlist-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.wishlist-card{background:var(--card);border-radius:16px;margin:0 20px 12px;border:1px solid #1e1e1e;overflow:hidden}
+.wc-img{height:120px;position:relative;display:flex;align-items:center;justify-content:center}
+.wc-img svg{width:40px;height:40px;opacity:0.1;stroke:var(--orange);fill:none;stroke-width:1}
+.wc-img-bg{position:absolute;inset:0}
+.wc-remove{position:absolute;top:10px;right:10px;width:28px;height:28px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.wc-remove svg{width:13px;height:13px;stroke:var(--white);fill:none;stroke-width:2.5}
+.wc-body{padding:12px}
+.wc-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.wc-loc{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px;margin-bottom:8px}
+.wc-loc svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2}
+.wc-price{font-size:16px;font-weight:800;color:var(--orange);margin-bottom:8px}
+.wc-footer{display:flex;align-items:center;justify-content:space-between}
+.wc-saved{font-size:11px;color:var(--muted)}
+/* S07 ACCOUNT */
+.acct-header{padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.acct-avatar{width:72px;height:72px;background:var(--orange);border-radius:20px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:var(--black)}
+.acct-name{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.acct-verified{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green);font-weight:600}
+.acct-verified svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:2.5}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 20px 16px}
+.stat-item{background:var(--card);border-radius:14px;padding:14px 10px;text-align:center;border:1px solid #1e1e1e}
+.stat-num{font-size:22px;font-weight:800;color:var(--white)}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500}
+.menu-section{padding:0 20px 16px}
+.menu-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #111;cursor:pointer}
+.menu-item:last-child{border-bottom:none}
+.menu-icon{width:36px;height:36px;background:var(--card);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #1e1e1e}
+.menu-icon svg{width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2}
+.menu-label{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.menu-arrow svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+/* S08 CALLBACK */
+.modal-overlay{flex:1;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,0.6)}
+.bottom-sheet{background:#111;border-radius:24px 24px 0 0;padding:20px 24px 40px;border-top:1px solid #222}
+.sheet-handle{width:40px;height:4px;background:#333;border-radius:2px;margin:0 auto 20px}
+.sheet-title{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:6px}
+.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.oi-badge-lg{background:rgba(255,130,64,0.1);border:1px solid rgba(255,130,64,0.25);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.oi-badge-lg svg{width:20px;height:20px;stroke:var(--orange);fill:none;stroke-width:2;flex-shrink:0}
+.oi-badge-text{font-size:13px;font-weight:600;color:var(--orange)}
+.input-group{margin-bottom:14px}
+.input-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+.input-field{background:var(--card2);border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;font-size:15px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif;width:100%;outline:none}
+.input-field::placeholder{color:var(--muted)}
+.sheet-note{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:16px;display:flex;align-items:flex-start;gap:6px;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px}
+.sheet-note svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+/* S09 LOGIN */
+.login-body{flex:1;padding:30px 24px}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.login-logo-icon{width:40px;height:40px;background:var(--orange);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.login-logo-icon svg{width:22px;height:22px;stroke:var(--black);fill:none;stroke-width:2.5}
+.login-logo-name{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.login-title{font-size:26px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:6px}
+.login-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.5}
+.phone-input-wrap{display:flex;gap:10px;margin-bottom:14px}
+.country-code{background:var(--card);border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:600;color:var(--white);flex-shrink:0}
+.otp-boxes{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+.otp-box{width:44px;height:54px;background:var(--card);border:2px solid var(--orange);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--white)}
+.otp-box.empty{border-color:#2a2a2a}
+.resend-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.resend-timer{font-size:13px;color:var(--muted)}
+.resend-link{font-size:13px;color:var(--orange);font-weight:600;cursor:pointer}
+/* S10 NOTIFICATIONS */
+.notif-header{padding:16px 20px 0}
+.notif-title{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px}
+.notif-count{font-size:13px;color:var(--muted);margin-bottom:16px}
+.notif-item{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid #111;cursor:pointer;position:relative}
+.notif-item.unread{background:rgba(255,130,64,0.03)}
+.notif-unread-dot{position:absolute;top:18px;right:16px;width:7px;height:7px;background:var(--orange);border-radius:50%}
+.notif-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-icon svg{width:18px;height:18px;fill:none;stroke-width:2}
+.notif-content{flex:1;min-width:0}
+.notif-title-text{font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px}
+.notif-body{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+.notif-time{font-size:11px;color:var(--muted);opacity:0.7}
+/* DEVELOPER PORTAL SCREENS */
+.dev-portal-header{background:linear-gradient(180deg,#0d0a14,var(--black));padding:16px 20px 0}
+.dev-portal-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(155,89,182,0.15);border:1px solid rgba(155,89,182,0.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--purple);letter-spacing:0.3px;margin-bottom:8px}
+.dev-portal-badge svg{width:11px;height:11px;stroke:var(--purple);fill:none;stroke-width:2}
+.dev-portal-name{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px}
+.dev-portal-sub{font-size:12px;color:var(--muted)}
+.dev-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 0}
+.dev-stat{background:var(--card);border-radius:16px;padding:16px;border:1px solid #1e1e1e}
+.ds-num{font-size:26px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.ds-label{font-size:11px;color:var(--muted);margin-top:2px}
+.ds-trend{font-size:11px;color:var(--green);margin-top:6px;display:flex;align-items:center;gap:3px;font-weight:600}
+.ds-trend svg{width:11px;height:11px;stroke:var(--green);fill:none;stroke-width:2.5}
+.quick-add-cta{margin:14px 20px 0;background:linear-gradient(135deg,rgba(255,130,64,0.15),rgba(253,209,113,0.08));border:1px solid rgba(255,130,64,0.25);border-radius:20px;padding:20px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.qa-icon{width:52px;height:52px;background:var(--orange);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qa-icon svg{width:24px;height:24px;stroke:var(--black);fill:none;stroke-width:2.5}
+.qa-title{font-size:16px;font-weight:800;color:var(--white);letter-spacing:-0.3px;margin-bottom:3px}
+.qa-sub{font-size:12px;color:var(--muted)}
+/* D02 PROJECT CARDS */
+.project-card{background:var(--card);border-radius:16px;margin:0 20px 12px;border:1px solid #1e1e1e;overflow:hidden}
+.pc-top{height:100px;position:relative;display:flex;align-items:center;justify-content:center}
+.pc-top svg{width:40px;height:40px;opacity:0.1;stroke:var(--orange);fill:none;stroke-width:1}
+.pc-top-bg{position:absolute;inset:0}
+.pc-top-badges{position:absolute;top:8px;left:8px;display:flex;gap:5px}
+.pc-body{padding:12px}
+.pc-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:3px}
+.pc-loc{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px;margin-bottom:8px}
+.pc-loc svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2}
+.pc-meta{display:flex;gap:12px;margin-bottom:10px}
+.pc-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.pc-meta-item svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2}
+.pc-actions{display:flex;gap:8px}
+.pc-action-btn{flex:1;background:var(--card2);border:1px solid #2a2a2a;border-radius:10px;padding:8px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px}
+.pc-action-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+/* D03 QUICK ADD */
+.step-header{padding:16px 20px 0}
+.step-progress{display:flex;gap:6px;margin-bottom:16px}
+.step-dot{flex:1;height:4px;background:var(--card2);border-radius:2px}
+.step-dot.done{background:var(--orange)}
+.step-dot.active{background:var(--orange);opacity:0.5}
+.step-title{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px}
+.step-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.form-field{margin:0 20px 14px}
+.field-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.3px}
+.field-input{background:var(--card);border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;font-size:15px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif;width:100%;outline:none}
+.field-input::placeholder{color:var(--muted)}
+.field-select{background:var(--card);border:1px solid #2a2a2a;border-radius:14px;padding:14px 16px;font-size:14px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif;width:100%;outline:none;appearance:none;cursor:pointer}
+.step-next-btn{margin:20px 20px 0;background:var(--orange);color:var(--black);border:none;border-radius:16px;height:54px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;width:calc(100% - 40px)}
+/* D04 EDIT */
+.edit-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid #1a1a1a;overflow-x:auto;scrollbar-width:none}
+.edit-tabs::-webkit-scrollbar{display:none}
+.edit-tab{flex-shrink:0;padding:12px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.edit-tab.on{color:var(--orange);border-bottom-color:var(--orange)}
+/* D05 SHORTS UPLOAD */
+.upload-area{margin:16px 20px 0;height:160px;background:var(--card);border-radius:16px;border:2px dashed #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.upload-area svg{width:36px;height:36px;stroke:var(--muted);fill:none;stroke-width:1.5}
+.upload-title{font-size:14px;font-weight:700;color:var(--text)}
+.upload-sub{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
+/* D06 LEADS */
+.lead-item{background:var(--card);border-radius:14px;padding:14px;margin:0 20px 10px;border:1px solid #1e1e1e}
+.lead-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lead-id{font-size:12px;font-weight:700;color:var(--muted)}
+.lead-status{padding:3px 10px;border-radius:8px;font-size:10px;font-weight:700}
+.lead-status.pending{background:rgba(253,209,113,0.15);color:var(--yellow)}
+.lead-status.validated{background:rgba(39,174,96,0.15);color:var(--green)}
+.lead-status.connected{background:rgba(41,128,185,0.15);color:var(--blue)}
+.lead-property{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.lead-anon{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.lead-anon svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2}
+.lead-time{font-size:11px;color:var(--muted);margin-top:6px}
+/* D07 ANALYTICS */
+.analytics-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.analytics-title{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.export-btn{background:var(--card);border:1px solid #1e1e1e;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:5px}
+.export-btn svg{width:13px;height:13px;stroke:var(--text);fill:none;stroke-width:2}
+.period-tabs{display:flex;gap:6px;padding:12px 20px 0}
+.period-tab{flex:1;background:var(--card);border:1px solid #1e1e1e;border-radius:10px;padding:7px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+.period-tab.on{background:var(--orange);color:var(--black);border-color:var(--orange)}
+.analytics-card{background:var(--card);border-radius:16px;padding:16px;margin:12px 20px 0;border:1px solid #1e1e1e}
+.ac-title{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.ac-title svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.ac-num{font-size:24px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.ac-trend{font-size:12px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:3px}
+.ac-trend.up{color:var(--green)}
+.ac-trend.down{color:#e74c3c}
+.ac-trend svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5}
+.chart-area{height:80px;display:flex;align-items:flex-end;gap:3px;margin-top:12px}
+.chart-bar{border-radius:3px 3px 0 0;flex:1;min-width:0;background:rgba(255,130,64,0.2);position:relative}
+.chart-bar.hi{background:var(--orange)}
+.chart-labels{display:flex;justify-content:space-between;margin-top:4px;padding:0 1px}
+.chart-label{font-size:9px;color:var(--muted);font-weight:500}
+
+/* ═══════════════════════════════════════
+   ADMIN PANEL STYLES
+═══════════════════════════════════════ */
+.admin-topbar{background:linear-gradient(135deg,#0d0a14,#12091a);padding:16px 20px 14px;border-bottom:1px solid rgba(155,89,182,0.2)}
+.admin-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.admin-logo{width:34px;height:34px;background:var(--purple);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.admin-logo svg{width:18px;height:18px;stroke:var(--white);fill:none;stroke-width:2}
+.admin-title{font-size:16px;font-weight:800;color:var(--white);letter-spacing:-0.3px}
+.admin-subtitle{font-size:11px;color:rgba(155,89,182,0.8);font-weight:500}
+.admin-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.admin-stat{background:rgba(255,255,255,0.04);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06)}
+.admin-stat-num{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.admin-stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+.admin-stat-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:3px;font-weight:600}
+.admin-stat-trend.up{color:var(--green)}
+.admin-stat-trend.down{color:var(--red)}
+.admin-stat-trend svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+/* Admin nav */
+.admin-bnav-inner{position:sticky;bottom:0;left:0;right:0;height:72px;background:rgba(8,6,15,0.98);border-top:1px solid rgba(155,89,182,0.15);display:flex;align-items:center;justify-content:space-around;backdrop-filter:blur(20px);padding-bottom:6px;margin-top:auto;flex-shrink:0;z-index:50}
+.admin-ni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 12px;border-radius:12px;font-size:9px;font-weight:600;color:var(--muted)}
+.admin-ni svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.admin-ni.active{color:var(--purple)}
+/* Admin content cards */
+.admin-card{background:rgba(255,255,255,0.04);border-radius:16px;margin:0 20px 10px;border:1px solid rgba(255,255,255,0.07);overflow:hidden}
+.admin-card-header{padding:14px 16px 12px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between}
+.admin-card-title{font-size:14px;font-weight:700;color:var(--white);display:flex;align-items:center;gap:8px}
+.admin-card-title svg{width:15px;height:15px;stroke:var(--purple);fill:none;stroke-width:2}
+.admin-card-action{font-size:12px;color:var(--purple);font-weight:600;cursor:pointer}
+.admin-card-body{padding:12px 16px}
+/* Admin table rows */
+.admin-table-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.admin-table-row:last-child{border-bottom:none}
+.admin-row-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.admin-row-icon svg{width:16px;height:16px;fill:none;stroke-width:2}
+.admin-row-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px}
+.admin-row-sub{font-size:11px;color:var(--muted)}
+.admin-row-right{margin-left:auto;text-align:right}
+.admin-row-val{font-size:13px;font-weight:700;color:var(--white)}
+.admin-row-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-top:3px}
+/* Admin action buttons */
+.admin-action-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.05)}
+.admin-act-btn{flex:1;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.admin-act-btn svg{width:13px;height:13px;fill:none;stroke-width:2}
+.admin-act-primary{background:var(--purple);color:var(--white)}
+.admin-act-secondary{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
+.admin-act-danger{background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.2)}
+.admin-act-success{background:rgba(39,174,96,0.15);color:var(--green);border:1px solid rgba(39,174,96,0.2)}
+/* Admin section title */
+.admin-section-title{padding:14px 20px 8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.admin-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
+/* Admin chip row */
+.admin-chip-row{display:flex;gap:6px;padding:0 20px 10px;overflow-x:auto;scrollbar-width:none}
+.admin-chip-row::-webkit-scrollbar{display:none}
+.admin-chip{flex-shrink:0;background:rgba(255,255,255,0.04);color:var(--text);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.admin-chip.on{background:var(--purple);color:var(--white);border-color:var(--purple)}
+/* Admin lead items */
+.admin-lead{background:rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin:0 20px 10px;border:1px solid rgba(255,255,255,0.07)}
+.admin-lead-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.admin-lead-id{font-size:12px;font-weight:700;color:var(--muted)}
+.admin-lead-prop{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px}
+.admin-lead-info{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.admin-lead-info span{display:flex;align-items:center;gap:3px}
+.admin-lead-info svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2}
+.admin-lead-actions{display:flex;gap:6px;margin-top:10px}
+.admin-lead-btn{flex:1;border:none;border-radius:8px;padding:7px;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.alb-approve{background:rgba(39,174,96,0.15);color:var(--green)}
+.alb-reject{background:rgba(231,76,60,0.1);color:var(--red)}
+.alb-call{background:rgba(41,128,185,0.15);color:var(--blue)}
+/* Admin list items */
+.admin-list-item{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:12px;cursor:pointer}
+.admin-list-item:last-child{border-bottom:none}
+.ali-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ali-icon svg{width:18px;height:18px;fill:none;stroke-width:2}
+.ali-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:3px}
+.ali-sub{font-size:11px;color:var(--muted)}
+.ali-right{margin-left:auto;text-align:right}
+.ali-actions{display:flex;gap:6px}
+.ali-btn{border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.ali-approve{background:rgba(39,174,96,0.15);color:var(--green)}
+.ali-reject{background:rgba(231,76,60,0.12);color:var(--red)}
+.ali-edit{background:rgba(155,89,182,0.12);color:var(--purple)}
+/* Admin platform stats bar */
+.platform-bar{background:rgba(255,255,255,0.03);border-radius:12px;padding:12px 14px;margin:0 20px 10px;border:1px solid rgba(255,255,255,0.06)}
+.pb-label{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.pb-bar-wrap{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.pb-bar-fill{height:100%;border-radius:4px}
+.pb-vals{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}
+/* MISC */
+.empty-state{padding:40px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.empty-icon{width:64px;height:64px;background:var(--card);border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.empty-icon svg{width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5}
+.empty-title{font-size:18px;font-weight:700;color:var(--white)}
+.empty-sub{font-size:14px;color:var(--muted);line-height:1.5}
+.g1{background:linear-gradient(135deg,#0d1117,#1a1a2e,#16213e)}
+.g2{background:linear-gradient(135deg,#1a0d2e,#2d1b69,#11998e)}
+.g3{background:linear-gradient(135deg,#0d2e1a,#1a5c2e,#0f460f)}
+.g4{background:linear-gradient(135deg,#2e1a0d,#5c3a1a,#8b5e3c)}
+.g5{background:linear-gradient(135deg,#0d1f2e,#1a3a5c,#0f2940)}
+.g6{background:linear-gradient(135deg,#2e0d1a,#5c1a2e,#8b0f3c)}
+.admin-g{background:linear-gradient(135deg,#0d0a14,#1a0e2e,#200a38)}
+.section-group-header{text-align:center;padding:40px 0 20px}
+.sgh-label{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.sgh-label.purple{color:var(--purple)}
+.sgh-title{font-size:24px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.sgh-sub{font-size:14px;color:var(--muted);margin-top:6px}
+.scroll-hint{background:rgba(255,130,64,0.08);border:1px solid rgba(255,130,64,0.15);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:8px;margin:0 auto 32px;width:fit-content}
+.scroll-hint svg{width:16px;height:16px;stroke:var(--orange);fill:none;stroke-width:2}
+.scroll-hint span{font-size:12px;color:var(--orange);font-weight:600}
+/* Alert/toast */
+.admin-alert{margin:0 20px 10px;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+.admin-alert svg{width:14px;height:14px;fill:none;stroke-width:2;flex-shrink:0}
+.admin-alert.warning{background:rgba(253,209,113,0.1);color:var(--yellow);border:1px solid rgba(253,209,113,0.2)}
+.admin-alert.warning svg{stroke:var(--yellow)}
+.admin-alert.success{background:rgba(39,174,96,0.1);color:var(--green);border:1px solid rgba(39,174,96,0.2)}
+.admin-alert.success svg{stroke:var(--green)}
+.admin-alert.info{background:rgba(41,128,185,0.1);color:var(--blue);border:1px solid rgba(41,128,185,0.2)}
+.admin-alert.info svg{stroke:var(--blue)}
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="brand-header">
+    <p class="page-title">Complete Prototype · v2.0 · April 2026</p>
+    <h1><span>Odisha</span>Infra — Full App Prototype</h1>
+    <p>Customer App (S01–S10) · Developer Portal (D01–D07) · Admin Panel (A01–A07) · 24 Screens Total</p>
+  </div>
+
+  <div class="scroll-hint">
+    <svg viewBox="0 0 24 24"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+    <span>Scroll down — 3 panels: Customer · Developer · Admin</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       CUSTOMER APP SCREENS
+  ═══════════════════════════════════════════ -->
+  <div class="section-group-header" style="width:100%">
+    <div class="sgh-label">Customer App</div>
+    <div class="sgh-title">Customer-Facing Screens</div>
+    <div class="sgh-sub">S01 through S10 — Discovery · Search · Reels · Wishlist · Account</div>
+  </div>
+
+  <div class="screen-grid">
+
+    <!-- S01 SPLASH -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S01</span> Splash / Onboarding</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="splash-inner">
+            <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div class="logo-name"><span style="color:var(--orange)">Odisha</span>Infra</div>
+            <div class="logo-sub">Real Estate Discovery Platform</div>
+            <div class="splash-divider"></div>
+            <div class="splash-tagline">Find your <em>dream home</em> across Odisha</div>
+          </div>
+          <div class="splash-btns">
+            <button class="btn-primary">Customer Login / Sign Up</button>
+            <button class="btn-ghost">I am a Developer / Builder</button>
+          </div>
+          <div class="splash-note">No broker registration required · OdishaInfra is your trusted intermediary</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S02 HOME FEED -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S02</span> Home Feed</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="home-header">
+              <div><div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:2px">Good morning ☀️</div><div class="greeting">Hello, <span>Priya!</span></div></div>
+              <div class="ha-right">
+                <div class="notif-bell"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div class="notif-dot"></div></div>
+                <div class="avatar">P</div>
+              </div>
+            </div>
+            <div class="search-bar" style="margin-top:14px">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <span>Search 2BHK, Villa, Plot...</span>
+              <div class="ai-badge">AI ✦</div>
+            </div>
+            <div class="chip-row" style="margin-top:12px">
+              <div class="chip on">All</div><div class="chip">Apartments</div><div class="chip">Villas</div><div class="chip">Plots</div><div class="chip">Commercial</div><div class="chip">Ready to Move</div>
+            </div>
+            <div class="featured-banner" style="margin-top:14px">
+              <div class="fb-tag">✦ Featured Project</div>
+              <div class="fb-name">Azure Heights Premium</div>
+              <div class="fb-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Patia, Bhubaneswar</div>
+              <div class="fb-bottom">
+                <div><div class="fb-price">₹45L – 85L</div><div class="fb-price-sub">2/3 BHK · Ready to Move</div></div>
+                <button class="fb-cta">View →</button>
+              </div>
+            </div>
+            <div class="sec-hd"><h2>Near You · Bhubaneswar</h2><span class="see-all">See All</span></div>
+            <div class="hscroll">
+              <div class="prop-card"><div class="prop-card-img"><div class="prop-card-img-bg g1"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="pc-badge"><span class="badge badge-green">Ready</span></div><div class="pc-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div><div class="prop-card-body"><div class="prop-card-name">Green Valley Villas</div><div class="prop-card-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Nayapalli, BBSR</div><div class="prop-card-price">₹78L</div><div class="prop-card-config">4 BHK Villa · 2200 sqft</div></div></div>
+              <div class="prop-card"><div class="prop-card-img"><div class="prop-card-img-bg g2"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="pc-badge"><span class="badge badge-orange">New Launch</span></div><div class="pc-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div><div class="prop-card-body"><div class="prop-card-name">Sunrise Residency</div><div class="prop-card-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Chandrasekharpur</div><div class="prop-card-price">₹32L</div><div class="prop-card-config">2 BHK · 1050 sqft</div></div></div>
+              <div class="prop-card"><div class="prop-card-img"><div class="prop-card-img-bg g3"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="pc-badge"><span class="badge badge-blue">UC</span></div><div class="pc-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div><div class="prop-card-body"><div class="prop-card-name">Lotus Gardens Plot</div><div class="prop-card-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Cuttack Road</div><div class="prop-card-price">₹18L</div><div class="prop-card-config">200 sqyd Plot</div></div></div>
+            </div>
+            <div class="sec-hd" style="margin-top:10px"><h2>New Launches</h2><span class="see-all">See All</span></div>
+            <div class="list-card"><div class="lc-img"><div class="g4" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">Coastal Breeze Puri</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Marine Drive, Puri</div><div class="lc-price">₹55L – 1.2Cr</div><div class="lc-tags"><span class="badge badge-orange">New Launch</span><span class="badge badge-green">RERA ✓</span></div></div></div>
+            <div class="list-card"><div class="lc-img"><div class="g5" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">TechCity Apartments</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Infocity, BBSR</div><div class="lc-price">₹42L – 68L</div><div class="lc-tags"><span class="badge badge-blue">Under Const.</span><span class="badge badge-orange">3 BHK</span></div></div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S03 SEARCH + AI -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S03</span> Search + AI Search</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="search-scr-header">
+              <div class="search-scr-title">Search Properties</div>
+              <div class="big-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input placeholder="Search 2BHK in Bhubaneswar..." value="3BHK under 60L Bhubaneswar"></div>
+            </div>
+            <div class="chip-row"><div class="chip on">All Odisha</div><div class="chip">BBSR</div><div class="chip">Cuttack</div><div class="chip">Puri</div><div class="chip">Rourkela</div><div class="chip">Sambalpur</div></div>
+            <div style="height:10px"></div>
+            <div class="ai-search-card">
+              <div class="asc-top"><div class="asc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div><div class="asc-title">AI Search <span style="font-size:10px;background:rgba(255,130,64,0.15);color:var(--orange);padding:2px 6px;border-radius:5px;margin-left:4px">Beta</span></div></div>
+              <div class="asc-sub">Ask in plain English — "3BHK near school under 60L in BBSR"</div>
+            </div>
+            <div class="ai-chat-box">
+              <div class="ai-msg-wrap">
+                <div class="ai-msg user">3BHK under 60 lakhs near good schools in Bhubaneswar</div>
+                <div class="ai-msg bot">Found 4 matching projects in Bhubaneswar under ₹60L with 3BHK configuration near school zones. Top picks: Azure Heights (Patia), Sunrise Residency (Chandrasekharpur), TechCity Apts (Infocity).</div>
+              </div>
+              <div class="ai-input-wrap"><input class="ai-input" placeholder="Ask AI anything..."><button class="ai-send-btn"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>
+            </div>
+            <div class="sec-hd" style="padding-top:4px"><h2>Results (4)</h2></div>
+            <div class="list-card"><div class="lc-img"><div class="g1" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">Azure Heights Premium</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, BBSR</div><div class="lc-price">₹45L–85L</div><div class="lc-tags"><span class="badge badge-green">Ready</span><span class="badge badge-orange">3 BHK</span></div></div></div>
+            <div class="list-card"><div class="lc-img"><div class="g2" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">Sunrise Residency</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Chandrasekharpur</div><div class="lc-price">₹38L–56L</div><div class="lc-tags"><span class="badge badge-orange">New Launch</span></div></div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S04 PROPERTY DETAIL -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S04</span> Property Detail</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="detail-hero g1"><div class="detail-hero-img"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="detail-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><div class="detail-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div>
+          <div class="scrollable">
+            <div class="detail-body">
+              <div class="detail-badges"><span class="badge badge-green">Ready to Move</span><span class="badge badge-orange">New Launch</span><span class="badge badge-blue">RERA ✓</span></div>
+              <div class="detail-name">Azure Heights Premium</div>
+              <div class="detail-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, Bhubaneswar — 751024</div>
+              <div class="detail-price">₹45L – ₹85L</div>
+              <div class="detail-price-sub">₹4,200/sqft · EMI from ₹32,000/mo</div>
+              <div class="spec-grid">
+                <div class="spec-item"><div class="spec-label">Config</div><div class="spec-value">2/3/4 BHK</div></div>
+                <div class="spec-item"><div class="spec-label">Area</div><div class="spec-value">1050–2200 sqft</div></div>
+                <div class="spec-item"><div class="spec-label">Floors</div><div class="spec-value">G + 14</div></div>
+                <div class="spec-item"><div class="spec-label">Possession</div><div class="spec-value">Dec 2026</div></div>
+                <div class="spec-item"><div class="spec-label">Total Units</div><div class="spec-value">240</div></div>
+                <div class="spec-item"><div class="spec-label">RERA No.</div><div class="spec-value">RP-1234</div></div>
+              </div>
+              <div class="map-box"><div class="map-grid"></div><div class="map-pin"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg></div></div>
+              <div class="dev-card"><div class="dev-avatar">AZ</div><div><div class="dev-name">Azure Builders Pvt. Ltd.</div><div class="dev-sub">6 Projects · ★ 4.8 rating</div></div><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;margin-left:auto"><polyline points="9 18 15 12 9 6"/></svg></div>
+              <div class="cta-area">
+                <button class="btn-primary" style="margin-bottom:10px">Request Callback via OdishaInfra</button>
+                <button class="btn-ghost">Add to Wishlist ♡</button>
+                <div class="cta-disclaimer">Your request goes to OdishaInfra team, not the developer. Validated within 20–48 hours.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S05 SHORTS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S05</span> Shorts / Reels Feed</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div style="flex:1;position:relative;overflow:hidden">
+            <div class="g5" style="position:absolute;inset:0"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.1"><svg viewBox="0 0 24 24" style="width:120px;height:120px;stroke:var(--orange);fill:none;stroke-width:0.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+            <!-- tabs -->
+            <div style="position:absolute;top:0;left:0;right:0;display:flex;padding:0 20px;background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);z-index:20">
+              <div class="shorts-tab on">All Odisha</div><div class="shorts-tab">BBSR</div><div class="shorts-tab">Cuttack</div><div class="shorts-tab">Puri</div>
+            </div>
+            <!-- right actions -->
+            <div class="shorts-actions" style="z-index:20">
+              <div class="shorts-act-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="rgba(255,255,255,0.15)"/></svg><span>24</span></div>
+              <div class="shorts-act-btn"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Share</span></div>
+              <div class="shorts-act-btn"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 10.79a19.79 19.79 0 01-3.07-8.67A2 2 0 011.95 0h3a2 2 0 012 1.72"/></svg><span>Call</span></div>
+            </div>
+            <!-- bottom overlay -->
+            <div class="shorts-overlay" style="z-index:20;position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,transparent 100%);padding:16px">
+              <div class="shorts-dev">
+                <div class="shorts-dev-av">AZ</div>
+                <div class="shorts-dev-name">Azure Builders</div>
+                <button class="follow-btn">Follow +</button>
+              </div>
+              <div class="shorts-prop-name">Azure Heights Premium</div>
+              <div class="shorts-prop-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, Bhubaneswar · ₹45L–85L</div>
+              <button class="shorts-cb-btn">📞 Request Callback from OdishaInfra Team</button>
+            </div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn active"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S06 WISHLIST -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S06</span> Wishlist</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="wishlist-header">
+              <div class="wishlist-title">My Wishlist</div>
+              <div class="wishlist-sub">4 saved properties</div>
+            </div>
+            <div class="wishlist-card"><div class="wc-img g1"><div class="wc-img-bg"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="wc-remove"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div><div class="wc-body"><div class="wc-name">Azure Heights Premium</div><div class="wc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, BBSR</div><div class="wc-price">₹45L – 85L</div><div class="wc-footer"><span class="wc-saved">Saved Apr 15</span><button class="btn-sm" style="padding:6px 14px;font-size:12px">Request Callback</button></div></div></div>
+            <div class="wishlist-card"><div class="wc-img g3"><div class="wc-img-bg"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="wc-remove"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div><div class="wc-body"><div class="wc-name">Green Valley Villas</div><div class="wc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Nayapalli, BBSR</div><div class="wc-price" style="display:flex;align-items:center;gap:6px">₹78L <span style="font-size:11px;color:var(--green);font-weight:600">▼ Price Drop</span></div><div class="wc-footer"><span class="wc-saved">Saved Apr 12</span><button class="btn-sm" style="padding:6px 14px;font-size:12px">Request Callback</button></div></div></div>
+            <div class="wishlist-card"><div class="wc-img g5"><div class="wc-img-bg"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="wc-remove"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div><div class="wc-body"><div class="wc-name">Coastal Breeze Puri</div><div class="wc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Marine Drive, Puri</div><div class="wc-price">₹55L – 1.2Cr</div><div class="wc-footer"><span class="wc-saved">Saved Apr 10</span><button class="btn-sm" style="padding:6px 14px;font-size:12px">Request Callback</button></div></div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S07 ACCOUNT -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S07</span> Account Screen</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="acct-header">
+              <div class="acct-avatar">P</div>
+              <div class="acct-name">Priya Mohanty</div>
+              <div class="acct-verified"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>OTP Verified · +91 98XXX XXXXX</div>
+              <button class="btn-sm" style="font-size:12px;padding:7px 18px">Edit Profile</button>
+            </div>
+            <div class="stats-row">
+              <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">Saved</div></div>
+              <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">Callbacks</div></div>
+              <div class="stat-item"><div class="stat-num">18</div><div class="stat-label">Viewed</div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="menu-section" style="padding-top:16px">
+              <div class="menu-title">My Activity</div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><div class="menu-label">My Wishlist</div><span class="badge badge-orange" style="margin-right:8px">4</span><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg></div><div class="menu-label">Callback Requests</div><span class="badge badge-blue" style="margin-right:8px">2</span><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="menu-label">Recently Viewed</div><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="menu-section" style="padding-top:16px">
+              <div class="menu-title">Settings</div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="menu-label">Notifications</div><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="menu-label">Location Preferences</div><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+              <div class="menu-item"><div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1117 17"/></svg></div><div class="menu-label">Help & Support</div><div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+            </div>
+            <div style="padding:0 20px 20px"><button class="btn-ghost" style="height:44px;border-color:rgba(231,76,60,0.3);color:var(--red)">Logout</button></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S08 CALLBACK MODAL -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S08</span> Callback Modal</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="modal-overlay">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px"><div style="text-align:center;opacity:0.4"><svg viewBox="0 0 24 24" style="width:48px;height:48px;stroke:var(--orange);fill:none;stroke-width:1;margin-bottom:10px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><div style="font-size:14px;color:var(--text);font-weight:600">Azure Heights Premium</div></div></div>
+            <div class="bottom-sheet">
+              <div class="sheet-handle"></div>
+              <div class="sheet-title">Request a Callback</div>
+              <div class="sheet-sub">For: Azure Heights Premium, Patia BBSR</div>
+              <div class="oi-badge-lg"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="oi-badge-text">OdishaInfra Team</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Your request goes directly to our team</div></div></div>
+              <div class="input-group"><label class="input-label">Your Phone Number</label><input class="input-field" type="tel" value="+91 98765 43210" placeholder="+91 XXXXX XXXXX"></div>
+              <div class="input-group"><label class="input-label">Best Time to Call (Optional)</label><input class="input-field" placeholder="e.g. 10 AM – 12 PM or Evenings"></div>
+              <div class="sheet-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Your number goes only to OdishaInfra. We validate your interest before connecting to the developer.</div>
+              <button class="btn-primary">Submit Callback Request</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S09 LOGIN OTP -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S09</span> Login / OTP</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="login-body">
+            <div class="login-logo"><div class="login-logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="login-logo-name"><span style="color:var(--orange)">Odisha</span>Infra</div></div>
+            <div class="login-title">Enter OTP</div>
+            <div class="login-sub">We sent a 6-digit code to +91 98765 43210</div>
+            <div class="otp-boxes">
+              <div class="otp-box">8</div><div class="otp-box">4</div><div class="otp-box">2</div><div class="otp-box empty"></div><div class="otp-box empty"></div><div class="otp-box empty"></div>
+            </div>
+            <div class="resend-row"><div class="resend-timer">Resend in 0:22</div><div class="resend-link">Change Number</div></div>
+            <button class="btn-primary" style="margin-bottom:14px">Verify & Continue</button>
+            <div style="text-align:center;font-size:12px;color:var(--muted)">By continuing, you agree to our <span style="color:var(--orange)">Terms of Service</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10 NOTIFICATIONS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">S10</span> Notification Centre</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="notif-header">
+              <div class="notif-title">Notifications</div>
+              <div class="notif-count">3 unread</div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-icon" style="background:rgba(39,174,96,0.15)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/><path d="M16 2a4 4 0 010 8"/><path d="M12 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-1"/></svg></div>
+              <div class="notif-content"><div class="notif-title-text">Callback Request Validated ✓</div><div class="notif-body">Your interest in Azure Heights has been confirmed. OdishaInfra will connect you with the developer shortly.</div><div class="notif-time">2 hours ago</div></div>
+              <div class="notif-unread-dot"></div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-icon" style="background:rgba(255,130,64,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+              <div class="notif-content"><div class="notif-title-text">New Project Near You 🏠</div><div class="notif-body">Coastal Breeze — New launch in Puri! 2 & 3 BHK starting ₹55L. Be among the first to enquire.</div><div class="notif-time">5 hours ago</div></div>
+              <div class="notif-unread-dot"></div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-icon" style="background:rgba(253,209,113,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><polyline points="20 12 20 22 4 22 4 12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/></svg></div>
+              <div class="notif-content"><div class="notif-title-text">Price Drop Alert 🎉</div><div class="notif-body">Green Valley Villas dropped price by ₹3L! Now starting at ₹75L. You saved this project.</div><div class="notif-time">Yesterday</div></div>
+              <div class="notif-unread-dot"></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-icon" style="background:rgba(41,128,185,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--blue)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="notif-content"><div class="notif-title-text">OdishaInfra Update</div><div class="notif-body">Welcome to OdishaInfra! Explore 120+ verified projects across Bhubaneswar, Cuttack, and Puri.</div><div class="notif-time">3 days ago</div></div>
+            </div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</div>
+            <div class="ni shorts-btn"><div class="ni-icon-wrap"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Account</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end customer screen-grid -->
+
+  <!-- ═══════════════════════════════════════════
+       DEVELOPER PORTAL SCREENS
+  ═══════════════════════════════════════════ -->
+  <div class="section-group-header" style="width:100%">
+    <div class="sgh-label">Developer Portal</div>
+    <div class="sgh-title">Developer-Facing Screens</div>
+    <div class="sgh-sub">D01 through D07 — Dashboard · Projects · Leads · Analytics</div>
+  </div>
+
+  <div class="screen-grid">
+
+    <!-- D01 DEV DASHBOARD -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D01</span> Developer Dashboard</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="dev-portal-header">
+              <div class="dev-portal-badge"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Developer Portal</div>
+              <div class="dev-portal-name">Azure Builders Pvt. Ltd.</div>
+              <div class="dev-portal-sub">Verified · RERA Approved · Member since Jan 2025</div>
+            </div>
+            <div class="dev-stats-grid">
+              <div class="dev-stat"><div class="ds-num">6</div><div class="ds-label">Active Projects</div><div class="ds-trend"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+1 this month</div></div>
+              <div class="dev-stat"><div class="ds-num">142</div><div class="ds-label">Total Interests</div><div class="ds-trend"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+24 this week</div></div>
+              <div class="dev-stat"><div class="ds-num" style="color:var(--yellow)">5</div><div class="ds-label">Pending Callbacks</div><div class="ds-trend" style="color:var(--muted)">Via OdishaInfra</div></div>
+              <div class="dev-stat"><div class="ds-num">4.2K</div><div class="ds-label">Short Views</div><div class="ds-trend"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+62% this month</div></div>
+            </div>
+            <div class="quick-add-cta" style="cursor:pointer">
+              <div class="qa-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+              <div><div class="qa-title">Add Property in ~15 Seconds</div><div class="qa-sub">Quick 4-step wizard · Live immediately</div></div>
+            </div>
+            <div class="sec-hd" style="margin-top:10px"><h2>Recent Projects</h2><span class="see-all">View All</span></div>
+            <div class="list-card" style="margin:0 20px 10px"><div class="lc-img"><div class="g1" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">Azure Heights Premium</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, BBSR</div><div class="lc-price">₹45L–85L</div><div class="lc-tags"><span class="badge badge-green">Active</span><span style="font-size:11px;color:var(--muted)">48 interests</span></div></div></div>
+            <div class="list-card" style="margin:0 20px 10px"><div class="lc-img"><div class="g3" style="position:absolute;inset:0"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="lc-body"><div class="lc-name">Green Valley Villas</div><div class="lc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Nayapalli, BBSR</div><div class="lc-price">₹78L</div><div class="lc-tags"><span class="badge badge-blue">Under Const.</span><span style="font-size:11px;color:var(--muted)">31 interests</span></div></div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Projects</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D02 MY PROJECTS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D02</span> My Projects</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px">My Projects</div><button class="btn-sm" style="font-size:12px;padding:7px 14px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--black);fill:none;stroke-width:2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add New</button></div>
+            <div class="chip-row" style="margin-top:10px"><div class="chip on">All (6)</div><div class="chip">Active (5)</div><div class="chip">Inactive (1)</div><div class="chip">Sold Out</div></div>
+            <div style="height:12px"></div>
+            <div class="project-card"><div class="pc-top g1"><div class="pc-top-bg"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="pc-top-badges"><span class="badge badge-green">Active</span><span class="badge badge-orange">Featured</span></div></div><div class="pc-body"><div class="pc-name">Azure Heights Premium</div><div class="pc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Patia, BBSR</div><div class="pc-meta"><div class="pc-meta-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1,240 views</div><div class="pc-meta-item"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>48 saves</div><div class="pc-meta-item"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>5 leads</div></div><div class="pc-actions"><button class="pc-action-btn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><button class="pc-action-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</button><button class="pc-action-btn" style="color:var(--red)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Archive</button></div></div></div>
+            <div class="project-card" style="margin-top:0"><div class="pc-top g3"><div class="pc-top-bg"></div><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><div class="pc-top-badges"><span class="badge badge-blue">Under Const.</span></div></div><div class="pc-body"><div class="pc-name">Green Valley Villas</div><div class="pc-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Nayapalli, BBSR</div><div class="pc-meta"><div class="pc-meta-item"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>980 views</div><div class="pc-meta-item"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>31 saves</div></div><div class="pc-actions"><button class="pc-action-btn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button><button class="pc-action-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</button></div></div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Projects</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D03 QUICK ADD -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D03</span> Quick Add Property</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="step-header">
+              <div class="step-progress"><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+              <div class="step-title">Step 1 of 4 · Basic Info</div>
+              <div class="step-sub">~5 seconds · Fill 4 quick fields</div>
+            </div>
+            <div class="form-field"><label class="field-label">Project Name *</label><input class="field-input" type="text" placeholder="e.g. Azure Heights Premium" value="Sunrise Plots Phase 2"></div>
+            <div class="form-field"><label class="field-label">Property Type *</label><select class="field-select"><option selected>Plots</option><option>Apartment</option><option>Villa</option><option>Commercial</option></select></div>
+            <div class="form-field"><label class="field-label">Status *</label><select class="field-select"><option selected>New Launch</option><option>Under Construction</option><option>Ready to Move</option></select></div>
+            <div class="form-field"><label class="field-label">City *</label><select class="field-select"><option selected>Bhubaneswar</option><option>Cuttack</option><option>Puri</option><option>Rourkela</option><option>Sambalpur</option></select></div>
+            <div style="padding:0 20px;margin-bottom:16px;background:rgba(255,130,64,0.06);border-left:3px solid var(--orange);padding:12px 16px;margin:0 20px 14px;border-radius:0 10px 10px 0">
+              <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:3px">✦ AI Description</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.5">After uploading photos, AI can auto-generate a property description from your images.</div>
+            </div>
+            <button class="step-next-btn">Next: Upload Photos →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D04 EDIT PROJECT -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D04</span> Edit Project</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div style="padding:16px 20px 0;display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0"><polyline points="15 18 9 12 15 6"/></svg><div style="font-size:18px;font-weight:800;color:var(--white);letter-spacing:-0.5px">Edit Project</div><button class="btn-sm" style="margin-left:auto;font-size:12px;padding:6px 14px">Publish</button></div>
+          <div class="edit-tabs"><div class="edit-tab on">Basic Info</div><div class="edit-tab">Pricing</div><div class="edit-tab">Media</div><div class="edit-tab">Location</div><div class="edit-tab">Amenities</div></div>
+          <div class="scrollable" style="padding-bottom:80px">
+            <div style="height:12px"></div>
+            <div class="form-field"><label class="field-label">Project Name</label><input class="field-input" value="Azure Heights Premium"></div>
+            <div class="form-field"><label class="field-label">Property Type</label><select class="field-select"><option>Apartment</option><option selected>Villa</option></select></div>
+            <div class="form-field"><label class="field-label">RERA Number</label><input class="field-input" placeholder="OD-RERA-XXXX" value="RP/04/2024/1234"></div>
+            <div class="form-field"><label class="field-label">Status</label><select class="field-select"><option selected>Ready to Move</option><option>Under Construction</option></select></div>
+            <div class="form-field"><label class="field-label">Description</label><textarea class="field-input" style="height:80px;resize:none;line-height:1.5">Luxury 2/3/4 BHK apartments in the heart of Patia, Bhubaneswar. Premium amenities including pool, gym, and 24/7 security.</textarea></div>
+            <div style="height:20px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D05 UPLOAD SHORTS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D05</span> Upload Shorts</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px">Upload Short</div><div style="font-size:13px;color:var(--muted)">Max 60 seconds · 50MB · MP4/MOV</div></div>
+            <div class="upload-area"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg><div class="upload-title">Tap to select video</div><div class="upload-sub">MP4, MOV · Max 60 sec · Max 50MB</div></div>
+            <div style="height:14px"></div>
+            <div class="form-field"><label class="field-label">Link to Project *</label><select class="field-select"><option selected>Azure Heights Premium</option><option>Green Valley Villas</option></select></div>
+            <div class="form-field"><label class="field-label">Caption (max 150 chars)</label><input class="field-input" placeholder="Describe your project short..." value="Tour Azure Heights — 3BHK from ₹55L, Patia BBSR 🏠"></div>
+            <div style="padding:0 20px;font-size:12px;color:var(--muted);margin-bottom:14px">Thumbnail will be auto-extracted from 1 second mark or you can choose manually after upload.</div>
+            <div style="padding:0 20px">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:10px">Published Shorts (3/10)</div>
+              <div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px">
+                <div style="flex-shrink:0;width:90px;height:140px;background:var(--card2);border-radius:12px;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;cursor:pointer"><div class="g1" style="position:absolute;inset:0;border-radius:12px;opacity:0.6"></div><svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--white);fill:rgba(255,255,255,0.8);stroke-width:1.5;position:relative;z-index:1"><polygon points="5 3 19 12 5 21 5 3"/></svg><div style="font-size:10px;color:var(--white);font-weight:600;position:relative;z-index:1">2.1K views</div></div>
+                <div style="flex-shrink:0;width:90px;height:140px;background:var(--card2);border-radius:12px;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;cursor:pointer"><div class="g3" style="position:absolute;inset:0;border-radius:12px;opacity:0.6"></div><svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--white);fill:rgba(255,255,255,0.8);stroke-width:1.5;position:relative;z-index:1"><polygon points="5 3 19 12 5 21 5 3"/></svg><div style="font-size:10px;color:var(--white);font-weight:600;position:relative;z-index:1">980 views</div></div>
+              </div>
+            </div>
+            <div style="height:16px"></div>
+            <div style="padding:0 20px"><button class="btn-primary">Upload &amp; Publish Short</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D06 LEADS OVERVIEW -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D06</span> Leads Overview</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px">Leads Overview</div><div style="font-size:13px;color:var(--muted)">Managed exclusively via OdishaInfra team</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px 20px 0">
+              <div style="background:var(--card);border-radius:14px;padding:12px;border:1px solid #1e1e1e;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--white)">5</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Pending</div></div>
+              <div style="background:var(--card);border-radius:14px;padding:12px;border:1px solid #1e1e1e;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--green)">2</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Validated</div></div>
+              <div style="background:var(--card);border-radius:14px;padding:12px;border:1px solid #1e1e1e;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--blue)">1</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Connected</div></div>
+            </div>
+            <div style="margin:12px 20px 0;padding:12px 14px;background:rgba(255,130,64,0.06);border-radius:12px;border:1px solid rgba(255,130,64,0.2);font-size:12px;color:var(--muted);line-height:1.6;display:flex;gap:8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--orange);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Customer contact is anonymised until OdishaInfra validates and approves. You'll receive their details only after validation.</span></div>
+            <div style="height:12px"></div>
+            <div class="chip-row"><div class="chip on">All (8)</div><div class="chip">Pending (5)</div><div class="chip">Validated (2)</div><div class="chip">Connected (1)</div></div>
+            <div style="height:10px"></div>
+            <div class="lead-item"><div class="lead-top"><div class="lead-id">LEAD-2026-0042</div><div class="lead-status pending">Pending</div></div><div class="lead-property">Azure Heights Premium</div><div class="lead-anon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Customer identity protected · OdishaInfra reviewing</div><div class="lead-time">Requested: Apr 16, 2026 · 2:30 PM</div></div>
+            <div class="lead-item"><div class="lead-top"><div class="lead-id">LEAD-2026-0041</div><div class="lead-status validated">Validated</div></div><div class="lead-property">Azure Heights Premium</div><div class="lead-anon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Genuine buyer confirmed · Await connection</div><div class="lead-time">Requested: Apr 15, 2026 · 11:00 AM</div></div>
+            <div class="lead-item"><div class="lead-top"><div class="lead-id">LEAD-2026-0038</div><div class="lead-status connected">Connected</div></div><div class="lead-property">Green Valley Villas</div><div class="lead-anon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Mr. Raj S. — OdishaInfra has shared your contact</div><div class="lead-time">Connected: Apr 14, 2026 · 4:15 PM</div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Projects</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D07 ANALYTICS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid">D07</span> Developer Analytics</div>
+      <div class="phone">
+        <div class="sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content">
+          <div class="scrollable">
+            <div class="analytics-header"><div class="analytics-title">Analytics</div><button class="export-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export CSV</button></div>
+            <div class="period-tabs"><div class="period-tab">7D</div><div class="period-tab on">30D</div><div class="period-tab">3M</div><div class="period-tab">All</div></div>
+            <div class="analytics-card"><div class="ac-title" style="color:var(--orange)"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Total Views</div><div class="ac-num">3,842</div><div class="ac-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+18% vs last month</div><div class="chart-area"><div class="chart-bar" style="height:30%"></div><div class="chart-bar" style="height:45%"></div><div class="chart-bar" style="height:40%"></div><div class="chart-bar" style="height:60%"></div><div class="chart-bar" style="height:55%"></div><div class="chart-bar hi" style="height:75%"></div><div class="chart-bar hi" style="height:80%"></div><div class="chart-bar hi" style="height:90%"></div><div class="chart-bar hi" style="height:85%"></div><div class="chart-bar hi" style="height:95%"></div></div><div class="chart-labels"><span class="chart-label">Apr 1</span><span class="chart-label">Apr 8</span><span class="chart-label">Apr 15</span></div></div>
+            <div class="analytics-card" style="margin-top:10px"><div class="ac-title" style="color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Wishlist Saves</div><div class="ac-num">284</div><div class="ac-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+34% vs last month</div></div>
+            <div class="analytics-card" style="margin-top:10px"><div class="ac-title" style="color:var(--green)"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Short Views</div><div class="ac-num">4,220</div><div class="ac-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+62% vs last month</div></div>
+            <div class="analytics-card" style="margin-top:10px"><div class="ac-title" style="color:var(--yellow)"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Callback Requests</div><div class="ac-num">8</div><div class="ac-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>Via OdishaInfra</div></div>
+          </div>
+          <div class="bnav">
+            <div class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Projects</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Shorts</div>
+            <div class="ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="ni active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end developer screen-grid -->
+
+  <!-- ═══════════════════════════════════════════
+       ADMIN PANEL SCREENS — NEW
+  ═══════════════════════════════════════════ -->
+  <div class="section-group-header" style="width:100%">
+    <div class="sgh-label purple">Admin Panel · NEW</div>
+    <div class="sgh-title">OdishaInfra Internal CRM</div>
+    <div class="sgh-sub">A01 through A07 — Platform Control · Lead Validation · Developer KYC · Content Moderation</div>
+  </div>
+
+  <div class="screen-grid">
+
+    <!-- A01 ADMIN DASHBOARD -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A01</span> Admin Dashboard</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div class="admin-topbar">
+              <div class="admin-brand">
+                <div class="admin-logo"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div><div class="admin-title">OdishaInfra Admin</div><div class="admin-subtitle">Internal CRM Panel</div></div>
+                <div class="admin-avatar" style="margin-left:auto;width:32px;height:32px;background:var(--purple);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--white)">OI</div>
+              </div>
+              <div class="admin-stats-grid">
+                <div class="admin-stat"><div class="admin-stat-num">18</div><div class="admin-stat-label">Pending Leads Today</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+5 from yesterday</div></div>
+                <div class="admin-stat"><div class="admin-stat-num">4</div><div class="admin-stat-label">KYC Pending</div><div class="admin-stat-trend down"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>2 overdue</div></div>
+                <div class="admin-stat"><div class="admin-stat-num">247</div><div class="admin-stat-label">Active Users</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+12 this week</div></div>
+                <div class="admin-stat"><div class="admin-stat-num">38</div><div class="admin-stat-label">Live Projects</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+3 this month</div></div>
+              </div>
+            </div>
+            <!-- Platform health -->
+            <div class="admin-section-title">Platform Health</div>
+            <div style="padding:0 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+              <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:4px">API</div><div style="font-size:10px;color:var(--muted)">● Online</div></div>
+              <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:4px">AI Search</div><div style="font-size:10px;color:var(--muted)">● Active</div></div>
+              <div style="background:rgba(253,209,113,0.1);border:1px solid rgba(253,209,113,0.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--yellow);font-weight:700;margin-bottom:4px">CDN</div><div style="font-size:10px;color:var(--muted)">⚠ Slow</div></div>
+            </div>
+            <!-- Alert -->
+            <div class="admin-alert warning" style="margin-top:0"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>4 developer KYC verifications overdue (72+ hrs)</div>
+            <!-- Recent activity -->
+            <div class="admin-section-title">Today's Activity</div>
+            <div class="admin-card">
+              <div class="admin-card-header"><div class="admin-card-title"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Recent Leads</div><div class="admin-card-action">View All</div></div>
+              <div class="admin-card-body" style="padding:8px 16px">
+                <div class="admin-table-row"><div class="admin-row-icon" style="background:rgba(255,130,64,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="admin-row-name">Priya M. → Azure Heights</div><div class="admin-row-sub">+91 987XX XXXXX · 2 hrs ago</div></div><div class="admin-row-right"><div class="admin-row-badge" style="background:rgba(253,209,113,0.15);color:var(--yellow)">Pending</div></div></div>
+                <div class="admin-table-row"><div class="admin-row-icon" style="background:rgba(39,174,96,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="admin-row-name">Rajesh K. → Green Valley</div><div class="admin-row-sub">+91 876XX XXXXX · 4 hrs ago</div></div><div class="admin-row-right"><div class="admin-row-badge" style="background:rgba(39,174,96,0.12);color:var(--green)">Validated</div></div></div>
+                <div class="admin-table-row" style="border-bottom:none"><div class="admin-row-icon" style="background:rgba(41,128,185,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--blue)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="admin-row-name">Suchitra N. → Coastal Breeze</div><div class="admin-row-sub">+91 765XX XXXXX · 6 hrs ago</div></div><div class="admin-row-right"><div class="admin-row-badge" style="background:rgba(41,128,185,0.12);color:var(--blue)">Connected</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A02 LEAD VALIDATION -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A02</span> Lead Validation CRM</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between">
+              <div><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px">Lead Validation</div><div style="font-size:12px;color:var(--muted);margin-top:2px">18 pending · 2 overdue</div></div>
+              <div style="width:32px;height:32px;background:rgba(231,76,60,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(231,76,60,0.2)"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--red);fill:none;stroke-width:2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+            </div>
+            <div class="admin-chip-row" style="margin-top:10px"><div class="admin-chip on">All (18)</div><div class="admin-chip">Pending (14)</div><div class="admin-chip">In Review (4)</div><div class="admin-chip">Validated</div><div class="admin-chip">Rejected</div></div>
+            <div style="height:10px"></div>
+            <!-- LEAD CARDS -->
+            <div class="admin-lead">
+              <div class="admin-lead-top"><div class="admin-lead-id">LEAD-2026-0052</div><span class="badge badge-red">Overdue 28hr</span></div>
+              <div class="admin-lead-prop">Azure Heights Premium — 3BHK</div>
+              <div class="admin-lead-info">
+                <span><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Priya Mohanty</span>
+                <span><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg>+91 987XX XXXXX</span>
+                <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Best: Mornings</span>
+              </div>
+              <div class="admin-lead-actions">
+                <button class="admin-lead-btn alb-call">📞 Call Now</button>
+                <button class="admin-lead-btn alb-approve">✓ Validate</button>
+                <button class="admin-lead-btn alb-reject">✗ Reject</button>
+              </div>
+            </div>
+            <div class="admin-lead">
+              <div class="admin-lead-top"><div class="admin-lead-id">LEAD-2026-0051</div><span class="badge badge-yellow">Pending 6hr</span></div>
+              <div class="admin-lead-prop">Green Valley Villas — 4BHK</div>
+              <div class="admin-lead-info">
+                <span><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Rajan Sahoo</span>
+                <span><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07"/></svg>+91 876XX XXXXX</span>
+                <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Best: Evenings</span>
+              </div>
+              <div class="admin-lead-actions">
+                <button class="admin-lead-btn alb-call">📞 Call Now</button>
+                <button class="admin-lead-btn alb-approve">✓ Validate</button>
+                <button class="admin-lead-btn alb-reject">✗ Reject</button>
+              </div>
+            </div>
+            <div class="admin-lead" style="border-color:rgba(39,174,96,0.2)">
+              <div class="admin-lead-top"><div class="admin-lead-id">LEAD-2026-0048</div><span class="badge badge-green">Validated</span></div>
+              <div class="admin-lead-prop">Coastal Breeze Puri — 2BHK</div>
+              <div class="admin-lead-info">
+                <span><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Suchitra Nanda</span>
+                <span style="color:var(--green)">Budget confirmed: ₹60L</span>
+              </div>
+              <div class="admin-lead-actions">
+                <button class="admin-lead-btn" style="background:rgba(41,128,185,0.15);color:var(--blue);flex:2">📨 Connect with Developer</button>
+                <button class="admin-lead-btn" style="background:rgba(155,89,182,0.12);color:var(--purple)">📝 Notes</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A03 DEVELOPER KYC -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A03</span> Developer KYC Review</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px">Developer KYC</div><div style="font-size:12px;color:var(--muted)">4 pending verification · Approve within 24–72 hrs</div></div>
+            <div class="admin-chip-row" style="margin-top:10px"><div class="admin-chip on">All (12)</div><div class="admin-chip">Pending KYC (4)</div><div class="admin-chip">Approved (7)</div><div class="admin-chip">Rejected (1)</div></div>
+            <div style="height:12px"></div>
+            <!-- KYC ITEMS -->
+            <div class="admin-list-item">
+              <div class="ali-icon" style="background:rgba(253,209,113,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+              <div><div class="ali-name">Sunrise Developers Pvt. Ltd.</div><div class="ali-sub">RERA: RP/05/2026/0089 · Submitted 18hr ago</div></div>
+              <div class="ali-actions"><button class="ali-btn ali-approve">Approve</button><button class="ali-btn ali-reject">Reject</button></div>
+            </div>
+            <div class="admin-list-item">
+              <div class="ali-icon" style="background:rgba(253,209,113,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+              <div><div class="ali-name">Coastal Infra Builders</div><div class="ali-sub">RERA: RP/05/2026/0091 · Submitted 30hr ago</div></div>
+              <div class="ali-actions"><button class="ali-btn ali-approve">Approve</button><button class="ali-btn ali-reject">Reject</button></div>
+            </div>
+            <div class="admin-list-item">
+              <div class="ali-icon" style="background:rgba(39,174,96,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div><div class="ali-name">Azure Builders Pvt. Ltd.</div><div class="ali-sub">RERA: RP/04/2024/1234 · Verified ✓</div></div>
+              <div class="ali-right"><span class="badge badge-green">Active</span></div>
+            </div>
+            <div class="admin-list-item">
+              <div class="ali-icon" style="background:rgba(39,174,96,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div><div class="ali-name">Lotus Group Constructions</div><div class="ali-sub">RERA: RP/03/2024/0823 · Verified ✓</div></div>
+              <div class="ali-right"><span class="badge badge-green">Active</span></div>
+            </div>
+            <div class="admin-list-item">
+              <div class="ali-icon" style="background:rgba(231,76,60,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+              <div><div class="ali-name">XYZ Real Estate (Rejected)</div><div class="ali-sub">Invalid RERA cert · Rejected Apr 10</div></div>
+              <div class="ali-right"><span class="badge badge-red">Rejected</span></div>
+            </div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A04 LISTINGS MODERATION -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A04</span> Listings Moderation</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between">
+              <div><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px">Listings</div><div style="font-size:12px;color:var(--muted);margin-top:2px">38 live · 6 under review</div></div>
+              <button class="btn-purple" style="font-size:12px;padding:7px 14px">+ Feature</button>
+            </div>
+            <div class="admin-chip-row" style="margin-top:10px"><div class="admin-chip on">All (44)</div><div class="admin-chip">Live (38)</div><div class="admin-chip">Review (6)</div><div class="admin-chip">Featured (3)</div><div class="admin-chip">Inactive (2)</div></div>
+            <div style="height:10px"></div>
+            <!-- LISTING ROWS -->
+            <div class="admin-card" style="margin-bottom:10px">
+              <div class="admin-card-header"><div class="admin-card-title"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Featured Listings (3)</div><div class="admin-card-action">Manage</div></div>
+              <div class="admin-card-body" style="padding:8px 16px">
+                <div class="admin-table-row"><div class="admin-row-icon" style="background:rgba(255,130,64,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="admin-row-name">Azure Heights Premium</div><div class="admin-row-sub">Patia BBSR · 1,240 views · Azure Builders</div></div><div class="admin-row-right"><div class="admin-row-badge badge-orange">★ Featured</div></div></div>
+                <div class="admin-table-row" style="border-bottom:none"><div class="admin-row-icon" style="background:rgba(41,128,185,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--blue)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="admin-row-name">Coastal Breeze Puri</div><div class="admin-row-sub">Marine Drive · 920 views · Lotus Group</div></div><div class="admin-row-right"><div class="admin-row-badge badge-orange">★ Featured</div></div></div>
+              </div>
+              <div class="admin-action-row"><button class="admin-act-btn admin-act-secondary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to Featured</button><button class="admin-act-btn admin-act-danger"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>Remove</button></div>
+            </div>
+            <!-- REVIEW QUEUE -->
+            <div class="admin-section-title">Pending Review (6)</div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(253,209,113,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="ali-name">Sunrise Plots Phase 2</div><div class="ali-sub">Sunrise Developers · Bhubaneswar · Submitted 3hr ago</div></div><div class="ali-actions"><button class="ali-btn ali-approve">Approve</button><button class="ali-btn ali-edit">Edit</button></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(253,209,113,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="ali-name">RK Tower Commercial</div><div class="ali-sub">RK Infra · Cuttack · Submitted 8hr ago</div></div><div class="ali-actions"><button class="ali-btn ali-approve">Approve</button><button class="ali-btn ali-reject">Reject</button></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(253,209,113,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--yellow)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="ali-name">Lake View Residency</div><div class="ali-sub">Lotus Group · Sambalpur · Submitted 14hr ago</div></div><div class="ali-actions"><button class="ali-btn ali-approve">Approve</button><button class="ali-btn ali-reject">Reject</button></div></div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A05 USER MANAGEMENT -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A05</span> User Management</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px">Users</div><div style="font-size:12px;color:var(--muted)">247 customers · 12 developers</div></div>
+            <div class="search-bar" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08);margin-top:10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span>Search users...</span></div>
+            <div class="admin-chip-row" style="margin-top:10px"><div class="admin-chip on">All (259)</div><div class="admin-chip">Customers (247)</div><div class="admin-chip">Developers (12)</div><div class="admin-chip">Blocked (2)</div></div>
+            <!-- platform summary -->
+            <div style="padding:10px 20px 0">
+              <div class="platform-bar"><div class="pb-label"><span>Registration Growth (30 Days)</span><span style="color:var(--green)">+18%</span></div><div class="pb-bar-wrap"><div class="pb-bar-fill" style="width:72%;background:linear-gradient(90deg,var(--purple),var(--orange))"></div></div><div class="pb-vals"><span>72% of monthly target</span><span>247/340</span></div></div>
+            </div>
+            <!-- USER LIST -->
+            <div class="admin-section-title">Recent Signups</div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(255,130,64,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="ali-name">Priya Mohanty</div><div class="ali-sub">Customer · BBSR · Joined Apr 16 · 2 callbacks</div></div><div class="ali-actions"><button class="ali-btn ali-edit">View</button></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(255,130,64,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="ali-name">Rajan Sahoo</div><div class="ali-sub">Customer · Cuttack · Joined Apr 15 · 1 callback</div></div><div class="ali-actions"><button class="ali-btn ali-edit">View</button></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(155,89,182,0.15)"><svg viewBox="0 0 24 24" style="stroke:var(--purple)"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div><div><div class="ali-name">Sunrise Developers</div><div class="ali-sub">Developer · KYC Verified · 2 projects · Joined Apr 12</div></div><div class="ali-actions"><button class="ali-btn ali-edit">View</button></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(231,76,60,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="ali-name">Spam User #221</div><div class="ali-sub">Customer · Blocked · Spam reports: 3</div></div><div class="ali-actions"><button class="ali-btn ali-reject">Unblock</button></div></div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A06 PUSH NOTIFICATIONS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A06</span> Push Notifications</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:4px">Push Notifications</div><div style="font-size:12px;color:var(--muted)">Broadcast to customers · FCM powered</div></div>
+            <div style="height:12px"></div>
+            <!-- Compose card -->
+            <div class="admin-card">
+              <div class="admin-card-header"><div class="admin-card-title"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Compose Notification</div></div>
+              <div class="admin-card-body">
+                <div style="margin-bottom:10px"><label class="field-label" style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;display:block">Target Audience</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <div class="admin-chip on" style="font-size:11px;padding:5px 10px">All Customers</div>
+                  <div class="admin-chip" style="font-size:11px;padding:5px 10px">BBSR Only</div>
+                  <div class="admin-chip" style="font-size:11px;padding:5px 10px">Cuttack</div>
+                  <div class="admin-chip" style="font-size:11px;padding:5px 10px">Puri</div>
+                </div></div>
+                <div style="margin-bottom:10px"><label class="field-label" style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;display:block">Notification Title</label><input class="field-input" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);" value="New Projects in Bhubaneswar 🏠"></div>
+                <div style="margin-bottom:14px"><label class="field-label" style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;display:block">Message Body</label><textarea class="field-input" style="height:60px;resize:none;line-height:1.5;background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);">3 new projects just launched in Patia, Chandrasekharpur, and Nayapalli. Starting ₹32L.</textarea></div>
+                <button class="btn-primary" style="background:var(--purple)">📨 Send to 247 Users</button>
+              </div>
+            </div>
+            <!-- Recent campaigns -->
+            <div class="admin-section-title">Recent Campaigns</div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(39,174,96,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="ali-name">New launches in Puri</div><div class="ali-sub">Sent to 247 users · Apr 14 · Open rate: 68%</div></div></div>
+            <div class="admin-list-item"><div class="ali-icon" style="background:rgba(39,174,96,0.12)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="ali-name">Weekend open house — BBSR</div><div class="ali-sub">Sent to 180 users · Apr 12 · Open rate: 74%</div></div></div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A07 PLATFORM ANALYTICS -->
+    <div class="phone-wrap">
+      <div class="screen-label"><span class="sid admin">A07</span> Platform Analytics</div>
+      <div class="phone">
+        <div class="sb admin-sb"><div class="sb-left">9:41</div><div class="sb-right"><div class="battery"><div class="battery-fill"></div></div></div></div>
+        <div class="sb-content admin-bg">
+          <div class="scrollable">
+            <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between"><div style="font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px">Platform Analytics</div><button class="export-btn" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button></div>
+            <div class="period-tabs" style="padding-top:12px">
+              <div class="period-tab" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)">7D</div>
+              <div class="period-tab on" style="background:var(--purple);border-color:var(--purple)">30D</div>
+              <div class="period-tab" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)">3M</div>
+              <div class="period-tab" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);color:var(--muted)">All</div>
+            </div>
+            <!-- Key metrics -->
+            <div style="padding:12px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="admin-stat"><div class="admin-stat-num">18,420</div><div class="admin-stat-label">Total App Opens</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+29%</div></div>
+              <div class="admin-stat"><div class="admin-stat-num">4:32</div><div class="admin-stat-label">Avg Session (min)</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+8%</div></div>
+              <div class="admin-stat"><div class="admin-stat-num">72%</div><div class="admin-stat-label">Shorts Watch Rate</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+15%</div></div>
+              <div class="admin-stat"><div class="admin-stat-num">18</div><div class="admin-stat-label">Leads Validated</div><div class="admin-stat-trend up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>+6 this week</div></div>
+            </div>
+            <!-- Funnel chart -->
+            <div class="admin-section-title">Conversion Funnel</div>
+            <div style="padding:0 20px">
+              <div class="platform-bar" style="margin:0 0 8px"><div class="pb-label"><span>App Opens → Property Views</span><span style="color:var(--orange)">64%</span></div><div class="pb-bar-wrap"><div class="pb-bar-fill" style="width:64%;background:var(--orange)"></div></div></div>
+              <div class="platform-bar" style="margin:0 0 8px"><div class="pb-label"><span>Views → Wishlist Saves</span><span style="color:var(--blue)">22%</span></div><div class="pb-bar-wrap"><div class="pb-bar-fill" style="width:22%;background:var(--blue)"></div></div></div>
+              <div class="platform-bar" style="margin:0 0 8px"><div class="pb-label"><span>Wishlist → Callback Request</span><span style="color:var(--green)">14%</span></div><div class="pb-bar-wrap"><div class="pb-bar-fill" style="width:14%;background:var(--green)"></div></div></div>
+              <div class="platform-bar" style="margin:0 0 8px"><div class="pb-label"><span>Callbacks → Validated</span><span style="color:var(--purple)">78%</span></div><div class="pb-bar-wrap"><div class="pb-bar-fill" style="width:78%;background:var(--purple)"></div></div></div>
+            </div>
+            <!-- Top cities -->
+            <div class="admin-section-title">Traffic by City</div>
+            <div class="admin-card" style="margin-bottom:12px">
+              <div class="admin-card-body">
+                <div class="admin-table-row"><div class="admin-row-icon" style="background:rgba(255,130,64,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--orange)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="admin-row-name">Bhubaneswar</div><div class="admin-row-sub">11,480 opens · 68% of total</div></div><div class="admin-row-right"><div class="admin-row-val" style="color:var(--orange)">68%</div></div></div>
+                <div class="admin-table-row"><div class="admin-row-icon" style="background:rgba(41,128,185,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--blue)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="admin-row-name">Cuttack</div><div class="admin-row-sub">3,210 opens · 19% of total</div></div><div class="admin-row-right"><div class="admin-row-val" style="color:var(--blue)">19%</div></div></div>
+                <div class="admin-table-row" style="border-bottom:none"><div class="admin-row-icon" style="background:rgba(39,174,96,0.1)"><svg viewBox="0 0 24 24" style="stroke:var(--green)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="admin-row-name">Puri</div><div class="admin-row-sub">2,180 opens · 13% of total</div></div><div class="admin-row-right"><div class="admin-row-val" style="color:var(--green)">13%</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="admin-bnav-inner">
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2"/></svg>Leads</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>KYC</div>
+            <div class="admin-ni"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Listings</div>
+            <div class="admin-ni active"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end admin screen-grid -->
+
+  <!-- FOOTER -->
+  <div style="text-align:center;margin-top:60px;padding:32px 24px;border-top:1px solid #1a1a1a;max-width:1000px;width:100%">
+    <div style="font-size:16px;font-weight:800;color:var(--white);letter-spacing:-0.5px;margin-bottom:6px"><span style="color:var(--orange)">Odisha</span>Infra — Complete Mobile App Prototype</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Product Requirements Document v2.0 · April 2026 · Confidential</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-size:11px;color:var(--muted)">
+      <span style="color:var(--orange)">10 Customer Screens (S01–S10)</span><span style="color:#2a2a2a">·</span>
+      <span style="color:rgba(155,89,182,0.9)">7 Developer Screens (D01–D07)</span><span style="color:#2a2a2a">·</span>
+      <span style="color:var(--purple)">7 Admin Screens (A01–A07)</span><span style="color:#2a2a2a">·</span>
+      <span>24 Screens Total</span><span style="color:#2a2a2a">·</span>
+      <span>Plus Jakarta Sans · #FF8240 · #010409 · #9b59b6</span>
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted)">Admin screens use purple (#9B59B6) accent to clearly distinguish from Customer (orange) and Developer (orange) portals</div>
+  </div>
+
+</div>
+<script>
+if(typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+</body>
+</html>
